@@ -1,0 +1,91 @@
+{
+  "sports": [
+    { "id": 1, "name": "Football" },
+    { "id": 2, "name": "Basketball" },
+    { "id": 3, "name": "Tennis" },
+    { "id": 4, "name": "Baseball" },
+    { "id": 5, "name": "Cricket" },
+    { "id": 6, "name": "Hockey" },
+    { "id": 7, "name": "Rugby" },
+    { "id": 8, "name": "Golf" },
+    { "id": 9, "name": "Boxing" },
+    { "id": 10, "name": "Formula 1" }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "sportId": 1,
+      "name": "Manchester United vs Liverpool",
+      "startTime": "2025-06-10T18:00:00Z",
+      "markets": [1, 2]
+    },
+    {
+      "id": 2,
+      "sportId": 2,
+      "name": "Lakers vs Celtics",
+      "startTime": "2025-06-11T20:00:00Z",
+      "markets": [3]
+    },
+    {
+      "id": 3,
+      "sportId": 3,
+      "name": "Nadal vs Federer",
+      "startTime": "2025-06-12T15:00:00Z",
+      "markets": [4]
+    }
+  ],
+  "markets": [
+    {
+      "id": 1,
+      "eventId": 1,
+      "name": "Match Winner",
+      "selections": [1, 2, 3]
+    },
+    {
+      "id": 2,
+      "eventId": 1,
+      "name": "Total Goals Over/Under 2.5",
+      "selections": [4, 5]
+    },
+    {
+      "id": 3,
+      "eventId": 2,
+      "name": "Match Winner",
+      "selections": [6, 7]
+    },
+    {
+      "id": 4,
+      "eventId": 3,
+      "name": "Match Winner",
+      "selections": [8, 9]
+    }
+  ],
+  "selections": [
+    { "id": 1, "marketId": 1, "name": "Manchester United", "odds": 2.1 },
+    { "id": 2, "marketId": 1, "name": "Liverpool", "odds": 1.8 },
+    { "id": 3, "marketId": 1, "name": "Draw", "odds": 3.5 },
+    { "id": 4, "marketId": 2, "name": "Over 2.5", "odds": 1.9 },
+    { "id": 5, "marketId": 2, "name": "Under 2.5", "odds": 2.0 },
+    { "id": 6, "marketId": 3, "name": "Lakers", "odds": 1.7 },
+    { "id": 7, "marketId": 3, "name": "Celtics", "odds": 2.2 },
+    { "id": 8, "marketId": 4, "name": "Nadal", "odds": 1.6 },
+    { "id": 9, "marketId": 4, "name": "Federer", "odds": 2.4 }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "bettor1",
+      "balance": 100.0
+    }
+  ],
+  "bets": [
+    {
+      "id": 1,
+      "userId": 1,
+      "selectionId": 2,
+      "stake": 10.0,
+      "potentialPayout": 18.0,
+      "status": "open"
+    }
+  ]
+}
