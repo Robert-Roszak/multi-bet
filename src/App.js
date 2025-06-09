@@ -1,158 +1,264 @@
-import React, { useEffect, useState } from 'react';
-import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import SportsBasketballIcon from '@mui/icons-material/SportsBasketball';
-import SportsTennisIcon from '@mui/icons-material/SportsTennis';
-import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
-import SportsCricketIcon from '@mui/icons-material/SportsCricket';
-import SportsHockeyIcon from '@mui/icons-material/SportsHockey';
-import SportsRugbyIcon from '@mui/icons-material/SportsRugby';
-import SportsGolfIcon from '@mui/icons-material/SportsGolf';
-import SportsMmaIcon from '@mui/icons-material/SportsMma';
-import SportsMotorsportsIcon from '@mui/icons-material/SportsMotorsports';
-import { Container, Box, Typography, List, ListItem, ListItemIcon, ListItemText, Paper } from '@mui/material';
+import React, { useEffect, useState, useRef } from 'react';
+import { Container, Box, Typography, Snackbar, AppBar, Toolbar } from '@mui/material';
 import './App.css';
-
-const sportIcons = {
-  Football: <SportsSoccerIcon fontSize="large" />,
-  Basketball: <SportsBasketballIcon fontSize="large" />,
-  Tennis: <SportsTennisIcon fontSize="large" />,
-  Baseball: <SportsBaseballIcon fontSize="large" />,
-  Cricket: <SportsCricketIcon fontSize="large" />,
-  Hockey: <SportsHockeyIcon fontSize="large" />,
-  Rugby: <SportsRugbyIcon fontSize="large" />,
-  Golf: <SportsGolfIcon fontSize="large" />,
-  Boxing: <SportsMmaIcon fontSize="large" />,
-  "Formula 1": <SportsMotorsportsIcon fontSize="large" />
-};
+import { v4 as uuidv4 } from 'uuid';
+import SportsList from './components/SportsList';
+import EventsList from './components/EventsList';
+import MarketsList from './components/MarketsList';
+import BetControls from './components/BetControls';
+import BetsDialog from './components/BetsDialog';
 
 function App() {
   const [sports, setSports] = useState([]);
   const [events, setEvents] = useState([]);
-  const [markets, setMarkets] = useState([]);
-  const [selections, setSelections] = useState([]);
   const [selectedSportId, setSelectedSportId] = useState(null);
   const [selectedEventId, setSelectedEventId] = useState(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [error, setError] = useState('');
+  const [userBets, setUserBets] = useState([]);
+  const [pendingBets, setPendingBets] = useState([]);
+  const [submitError, setSubmitError] = useState('');
+  const [pendingSuccessOpen, setPendingSuccessOpen] = useState(false);
+  const [submitSuccessOpen, setSubmitSuccessOpen] = useState(false);
+  const [validationError, setValidationError] = useState('');
+  const userId = 1;
+
+  const marketsListRef = useRef();
 
   useEffect(() => {
-    fetch('http://localhost:3001/sports').then(res => res.json()).then(setSports);
-    fetch('http://localhost:3001/events').then(res => res.json()).then(setEvents);
-    fetch('http://localhost:3001/markets').then(res => res.json()).then(setMarkets);
-    fetch('http://localhost:3001/selections').then(res => res.json()).then(setSelections);
+    fetch('http://localhost:3001/sports')
+      .then((res) => res.json())
+      .then(setSports);
+
+    fetch('http://localhost:3001/events')
+      .then((res) => res.json())
+      .then(setEvents);
+
+    fetchUserBets();
   }, []);
 
+  const fetchUserBets = () => {
+    fetch(`http://localhost:3001/bets?userId=${userId}`)
+      .then(res => res.ok ? res.json() : [])
+      .then(bets => setUserBets(bets));
+  };
+
+  const handlePrepareBets = () => {
+    setError('');
+    setValidationError('');
+    if (!acceptTerms) {
+      setValidationError('You must accept Terms & Conditions.');
+      return;
+    }
+
+    const betEntries = marketsListRef.current?.getSelectedBets() || [];
+
+    if (betEntries.length === 0) {
+      setValidationError('Please select at least one game and configure your bet.');
+      return;
+    }
+
+    let hasError = false;
+    let errorMsg = '';
+
+    const betsToStore = betEntries
+      .map(config => {
+        const event = events.find(e => e.id === config.eventId);
+        const market = event?.markets.find(m => Number(m.id) === Number(config.marketId));
+        const odds = market?.betTypes.find(bt => bt.type === config.betType)?.odds;
+        const stakeNum = Number(config.stake);
+        
+        if (!event || !market || !config.betType || !config.stake) {
+          hasError = true;
+          errorMsg = 'Each selected game must have a bet type and stake.';
+          return null;
+        }
+        if (isNaN(stakeNum) || stakeNum < 1 || stakeNum > 1000) {
+          hasError = true;
+          errorMsg = 'All stakes must be numbers between 1 and 1000.';
+          return null;
+        }
+        if (!odds) {
+          hasError = true;
+          errorMsg = 'Invalid bet type selected.';
+          return null;
+        }
+        return {
+          id: uuidv4(),
+          userId: 1,
+          eventId: config.eventId,
+          marketId: config.marketId,
+          betType: config.betType,
+          odds,
+          stake: stakeNum,
+          eventName: event.name,
+          marketName: market.name,
+          betTime: new Date().toISOString(),
+          potentialPayout: Number((odds * stakeNum).toFixed(2)),
+          status: "open"
+        };
+      })
+      .filter(Boolean);
+
+    if (hasError) {
+      setValidationError(errorMsg);
+      return;
+    }
+
+    setPendingBets(prev => [...prev, ...betsToStore]);
+    setSelectedEventId(null);
+    setAcceptTerms(false);
+    setPendingSuccessOpen(true);
+  };
+
+  const handleSubmitPendingBets = async () => {
+    if (!pendingBets.length) return;
+    try {
+      const responses = await Promise.all(
+        pendingBets.map(bet =>
+          fetch('http://localhost:3001/bets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bet)
+          }).then(res => res.json())
+        )
+      );
+      const betIds = responses.map(bet => bet.id);
+
+      const userRes = await fetch('http://localhost:3001/users/1');
+      const user = await userRes.json();
+      const currentBets = Array.isArray(user.bets) ? user.bets : [];
+
+      await fetch(`http://localhost:3001/users/1`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bets: [...currentBets, ...betIds]
+        })
+      });
+      setPendingBets([]);
+      fetchUserBets();
+      setSubmitSuccessOpen(true);
+    } catch (err) {
+      setSubmitError('Failed to submit bets.');
+    }
+  };
+
+  const handleClearAllPendingBets = () => {
+    setPendingBets([]);
+  };
+
   return (
-    <Container maxWidth={false} disableGutters sx={{ pt: 4 }}>
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={{
+        width: '100vw',
+        minWidth: 0,
+        overflowX: 'hidden',
+        p: 0,
+        m: 0,
+        boxSizing: 'border-box',
+      }}
+    >
       <Box
         display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="flex-start"
+        flexDirection="row"
         minHeight="100vh"
+        width="100vw"
+        sx={{
+          overflowX: 'hidden',
+          p: 0,
+          m: 0,
+          boxSizing: 'border-box',
+        }}
       >
-        <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 2 }}>
-          Sports List
-        </Typography>
-        <Paper elevation={3} sx={{ width: '100vw', mt: 2, borderRadius: 0 }}>
-          <List
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: 2,
-              m: 0,
-              width: '100%',
-            }}
-          >
-            {sports.map(sport => (
-              <ListItem
-                button
-                key={sport.id}
-                selected={selectedSportId === sport.id}
-                onClick={() => {
-                  setSelectedSportId(sport.id);
-                  setSelectedEventId(null);
-                }}
-                sx={{
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  width: 'auto',
-                  minWidth: 100,
-                  mx: 2,
-                  p: 0,
-                }}
-                disableGutters
-              >
-                <ListItemIcon sx={{ minWidth: 0, mb: 1, justifyContent: 'center' }}>
-                  {sportIcons[sport.name] || <SportsSoccerIcon fontSize="large" />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={sport.name}
-                  primaryTypographyProps={{
-                    fontSize: '1.1rem',
-                    textAlign: 'center',
-                  }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-
-        {/* Events List */}
-        {selectedSportId && (
-          <Box sx={{ mt: 4, width: '100%', maxWidth: 600 }}>
-            <Typography variant="h5" gutterBottom>
-              Events
-            </Typography>
-            <List>
-              {events
-                .filter(e => e.sportId === selectedSportId)
-                .map(event => (
-                  <ListItem
-                    button
-                    key={event.id}
-                    selected={selectedEventId === event.id}
-                    onClick={() => setSelectedEventId(event.id)}
-                  >
-                    <ListItemText
-                      primary={event.name}
-                      secondary={event.startTime ? new Date(event.startTime).toLocaleString() : ''}
-                    />
-                  </ListItem>
-                ))}
-            </List>
-          </Box>
-        )}
-
-        {/* Markets and Selections */}
-        {selectedEventId && (
-          <Box sx={{ mt: 4, width: '100%', maxWidth: 600 }}>
-            <Typography variant="h5" gutterBottom>
-              Markets
-            </Typography>
-            {markets
-              .filter(market => market.eventId === selectedEventId)
-              .map(market => (
-                <Paper key={market.id} sx={{ mb: 2, p: 2 }}>
-                  <Typography variant="subtitle1">{market.name}</Typography>
-                  <List>
-                    {market.selections.map(selId => {
-                      const sel = selections.find(s => s.id === selId);
-                      return (
-                        <ListItem key={selId}>
-                          <ListItemText
-                            primary={sel?.name}
-                            secondary={sel ? `Odds: ${sel.odds}` : ''}
-                          />
-                        </ListItem>
-                      );
-                    })}
-                  </List>
-                </Paper>
-              ))}
-          </Box>
-        )}
+        {/* Main content */}
+        <Box
+          flex={1}
+          minWidth={0}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="flex-start"
+          sx={{
+            overflowX: 'hidden',
+            p: 0,
+            m: 0,
+            boxSizing: 'border-box',
+          }}
+        >
+          <AppBar position="static" color="default" elevation={0}>
+            <Toolbar sx={{ justifyContent: 'flex-end', p: 0, m: 0 }} />
+          </AppBar>
+          <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 2 }}>
+            Multi-bet Sports Betting
+          </Typography>
+          <SportsList
+            sports={sports}
+            selectedSportId={selectedSportId}
+            setSelectedSportId={setSelectedSportId}
+            setSelectedEventId={setSelectedEventId}
+          />
+          {selectedSportId && (
+            <EventsList
+              events={events.filter(event => event.sportId === Number(selectedSportId))}
+              selectedEventId={selectedEventId}
+              setSelectedEventId={setSelectedEventId}
+            />
+          )}
+          {selectedEventId && (
+            <MarketsList
+              ref={marketsListRef}
+              event={events.find(event => event.id === selectedEventId)}
+            />
+          )}
+          {/* Global Controls */}
+          {selectedEventId && (
+            <BetControls
+              acceptTerms={acceptTerms}
+              setAcceptTerms={setAcceptTerms}
+              onSubmit={handlePrepareBets}
+              error={error}
+            />
+          )}
+        </Box>
+        {/* Bets sidebar */}
+        <BetsDialog
+          userBets={userBets}
+          pendingBets={pendingBets}
+          onClearAllPendingBets={handleClearAllPendingBets}
+          onSubmitPendingBets={handleSubmitPendingBets}
+        />
       </Box>
+      <Snackbar
+        open={pendingSuccessOpen}
+        autoHideDuration={3000}
+        onClose={() => setPendingSuccessOpen(false)}
+        message="Bets added to pending list successfully!"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+      <Snackbar
+        open={submitSuccessOpen}
+        autoHideDuration={3000}
+        onClose={() => setSubmitSuccessOpen(false)}
+        message="Bets submitted successfully!"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+      <Snackbar
+        open={!!submitError}
+        autoHideDuration={4000}
+        onClose={() => setSubmitError('')}
+        message={submitError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+      <Snackbar
+        open={!!validationError}
+        autoHideDuration={4000}
+        onClose={() => setValidationError('')}
+        message={validationError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Container>
   );
 }

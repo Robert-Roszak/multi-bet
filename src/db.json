@@ -1,90 +1,283 @@
 {
   "sports": [
-    { "id": 1, "name": "Football" },
-    { "id": 2, "name": "Basketball" },
-    { "id": 3, "name": "Tennis" },
-    { "id": 4, "name": "Baseball" },
-    { "id": 5, "name": "Cricket" },
-    { "id": 6, "name": "Hockey" },
-    { "id": 7, "name": "Rugby" },
-    { "id": 8, "name": "Golf" },
-    { "id": 9, "name": "Boxing" },
-    { "id": 10, "name": "Formula 1" }
+    {
+      "id": "1",
+      "name": "Football"
+    },
+    {
+      "id": "2",
+      "name": "Basketball"
+    },
+    {
+      "id": "3",
+      "name": "Tennis"
+    }
   ],
   "events": [
     {
-      "id": 1,
+      "id": "1",
       "sportId": 1,
       "name": "Manchester United vs Liverpool",
       "startTime": "2025-06-10T18:00:00Z",
-      "markets": [1, 2]
+      "markets": [
+        {
+          "id": 1,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 2.1
+            },
+            {
+              "type": "Draw",
+              "odds": 3.5
+            },
+            {
+              "type": "Away Win",
+              "odds": 1.8
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": 2,
+      "id": "2",
       "sportId": 2,
       "name": "Lakers vs Celtics",
       "startTime": "2025-06-11T20:00:00Z",
-      "markets": [3]
+      "markets": [
+        {
+          "id": 2,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 1.7
+            },
+            {
+              "type": "Away Win",
+              "odds": 2.2
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": 3,
+      "id": "3",
       "sportId": 3,
       "name": "Nadal vs Federer",
       "startTime": "2025-06-12T15:00:00Z",
-      "markets": [4]
+      "markets": [
+        {
+          "id": 2,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 1.6
+            },
+            {
+              "type": "Away Win",
+              "odds": 2.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "sportId": 1,
+      "name": "Real Madrid vs Barcelona",
+      "startTime": "2025-06-13T19:00:00Z",
+      "markets": [
+        {
+          "id": 3,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 2.3
+            },
+            {
+              "type": "Draw",
+              "odds": 3.1
+            },
+            {
+              "type": "Away Win",
+              "odds": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "sportId": 2,
+      "name": "Warriors vs Bulls",
+      "startTime": "2025-06-14T21:00:00Z",
+      "markets": [
+        {
+          "id": 4,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 1.9
+            },
+            {
+              "type": "Away Win",
+              "odds": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "sportId": 3,
+      "name": "Djokovic vs Alcaraz",
+      "startTime": "2025-06-15T16:00:00Z",
+      "markets": [
+        {
+          "id": 5,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 1.8
+            },
+            {
+              "type": "Away Win",
+              "odds": 2.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "sportId": 1,
+      "name": "Chelsea vs Arsenal",
+      "startTime": "2025-06-16T18:30:00Z",
+      "markets": [
+        {
+          "id": 6,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 2.5
+            },
+            {
+              "type": "Draw",
+              "odds": 3.2
+            },
+            {
+              "type": "Away Win",
+              "odds": 2.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "sportId": 2,
+      "name": "Heat vs Raptors",
+      "startTime": "2025-06-17T20:30:00Z",
+      "markets": [
+        {
+          "id": 7,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 1.6
+            },
+            {
+              "type": "Away Win",
+              "odds": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "sportId": 3,
+      "name": "Serena Williams vs Osaka",
+      "startTime": "2025-06-18T14:00:00Z",
+      "markets": [
+        {
+          "id": 8,
+          "name": "Match Winner",
+          "betTypes": [
+            {
+              "type": "Home Win",
+              "odds": 2
+            },
+            {
+              "type": "Away Win",
+              "odds": 1.9
+            }
+          ]
+        }
+      ]
     }
-  ],
-  "markets": [
-    {
-      "id": 1,
-      "eventId": 1,
-      "name": "Match Winner",
-      "selections": [1, 2, 3]
-    },
-    {
-      "id": 2,
-      "eventId": 1,
-      "name": "Total Goals Over/Under 2.5",
-      "selections": [4, 5]
-    },
-    {
-      "id": 3,
-      "eventId": 2,
-      "name": "Match Winner",
-      "selections": [6, 7]
-    },
-    {
-      "id": 4,
-      "eventId": 3,
-      "name": "Match Winner",
-      "selections": [8, 9]
-    }
-  ],
-  "selections": [
-    { "id": 1, "marketId": 1, "name": "Manchester United", "odds": 2.1 },
-    { "id": 2, "marketId": 1, "name": "Liverpool", "odds": 1.8 },
-    { "id": 3, "marketId": 1, "name": "Draw", "odds": 3.5 },
-    { "id": 4, "marketId": 2, "name": "Over 2.5", "odds": 1.9 },
-    { "id": 5, "marketId": 2, "name": "Under 2.5", "odds": 2.0 },
-    { "id": 6, "marketId": 3, "name": "Lakers", "odds": 1.7 },
-    { "id": 7, "marketId": 3, "name": "Celtics", "odds": 2.2 },
-    { "id": 8, "marketId": 4, "name": "Nadal", "odds": 1.6 },
-    { "id": 9, "marketId": 4, "name": "Federer", "odds": 2.4 }
   ],
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "username": "bettor1",
-      "balance": 100.0
+      "balance": 100,
+      "bets": [
+        "d0ae4cc8-17c0-4b60-a451-7bcd5d9af77a",
+        "7755b381-513b-4571-84ca-ec0c289c10b8",
+        "e3f04cdb-3ed7-42cb-a0d3-a6b149516cf1"
+      ]
     }
   ],
   "bets": [
     {
-      "id": 1,
+      "id": "d0ae4cc8-17c0-4b60-a451-7bcd5d9af77a",
       "userId": 1,
-      "selectionId": 2,
-      "stake": 10.0,
-      "potentialPayout": 18.0,
+      "eventId": "3",
+      "marketId": "2",
+      "betType": "Away Win",
+      "odds": 2.4,
+      "stake": 2,
+      "eventName": "Nadal vs Federer",
+      "marketName": "Match Winner",
+      "betTime": "2025-06-09T09:45:32.791Z",
+      "potentialPayout": 4.8,
+      "status": "open"
+    },
+    {
+      "id": "7755b381-513b-4571-84ca-ec0c289c10b8",
+      "userId": 1,
+      "eventId": "6",
+      "marketId": "5",
+      "betType": "Away Win",
+      "odds": 2.1,
+      "stake": 2,
+      "eventName": "Djokovic vs Alcaraz",
+      "marketName": "Match Winner",
+      "betTime": "2025-06-09T09:48:13.161Z",
+      "potentialPayout": 4.2,
+      "status": "open"
+    },
+    {
+      "id": "e3f04cdb-3ed7-42cb-a0d3-a6b149516cf1",
+      "userId": 1,
+      "eventId": "5",
+      "marketId": "4",
+      "betType": "Away Win",
+      "odds": 2,
+      "stake": 2,
+      "eventName": "Warriors vs Bulls",
+      "marketName": "Match Winner",
+      "betTime": "2025-06-09T09:48:20.233Z",
+      "potentialPayout": 4,
       "status": "open"
     }
   ]
